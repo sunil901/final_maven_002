@@ -1,5 +1,5 @@
 pipeline {
-	agent { label 'Build_Maven_server'}
+	agent {}
 	options {
 	  buildDiscarder(logRotator(numToKeepStr: '5'))
 	}
