@@ -16,7 +16,7 @@ pipeline {
 		}
 		stage ("3. Copy the package to S3-s3") {
 			steps {
-				sh "aws s3 cp target/helloproj-002.war s3://udemo-s3b1"
+				sh "aws s3 cp target/helloproj-002.war s3://udemo-s3b1-ne"
 			}
 		}
 		
