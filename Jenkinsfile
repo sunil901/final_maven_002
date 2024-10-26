@@ -4,17 +4,17 @@ pipeline {
         pollSCM('') //Empty quotes tells it to build on a push
     }
 	stages {
-	    stage ("1. Git repo") {
+	    stage ("1. Git repo-s1") {
 	        steps {
 	            git branch: 'proj_test', url: 'https://github.com/sunil901/final_maven_002.git'
 	        }
 	    }
-		stage ("2. Build the package") {
+		stage ("2. Build the package-s2") {
 			steps {
 				sh "mvn clean install"
 			}
 		}
-		stage ("3. Copy the package to S3") {
+		stage ("3. Copy the package to S3-s3") {
 			steps {
 				sh "aws s3 cp target/helloproj-002.war s3://udemo-s3b1"
 			}
