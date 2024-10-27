@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = 'ap-northeast-3' // Specify your AWS region
+        ECR_REPOSITORY = 'testrepo' // Replace with your ECR repository name
+        IMAGE_NAME = 'app-1' // Replace with your Docker image name
+        IMAGE_TAG = "${env.BUILD_ID}" // Tag your image with the Jenkins build ID
+        AWS_ACCOUNT_ID = 606324835521
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                // Checkout the code from your repository
+                git branch: 'proj_test', url: 'https://github.com/sunil901/final_maven_002.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                script {
+                    // Tag the Docker image for ECR
+                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Login to ECR') {
+            steps {
+                script {
+                    // Login to AWS ECR
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                }
+            }
+        }
+
+        stage('Push Docker Image to ECR') {
+            steps {
+                script {
+                    // Push the Docker image to ECR
+                    sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // Rollout the deployment
+                    sh "kubectl set image deployment/${YOUR_DEPLOYMENT_NAME} ${YOUR_CONTAINER_NAME}=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                    sh "kubectl rollout status deployment/${YOUR_DEPLOYMENT_NAME}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment was successful!'
+        }
+        failure {
+            echo 'Deployment failed.'
+        }
+    }
+}
