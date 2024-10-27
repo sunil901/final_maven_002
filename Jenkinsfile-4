@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'Build_Maven_server' }
 
     environment {
         AWS_REGION = 'ap-northeast-3' // Specify your AWS region
